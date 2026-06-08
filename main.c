@@ -11,13 +11,6 @@
 #define EDGE_THICKNESS 2.5
 #define POINT_COLOR RED
 #define EDGE_COLOR DARKGREEN
-#define VISITED_COLOR BLUE
-
-Color all_colors[] = {
-    WHITE,  DARKGREEN,  YELLOW, ORANGE,  PINK,  DARKBROWN, RED,
-    GREEN,  GOLD,       LIME,   SKYBLUE, BLUE,  DARKBLUE,  PURPLE,
-    VIOLET, DARKPURPLE, MAROON, BEIGE,   BROWN, MAGENTA,   RAYWHITE,
-};
 
 int main(void) {
   Graph graph = {0};
