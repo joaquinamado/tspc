@@ -12,8 +12,51 @@
 #define POINT_COLOR RED
 #define EDGE_COLOR DARKGREEN
 
+typedef struct {
+  bool isPlaying;
+  char *selectedAlg;
+} State;
+
+char *all_algorithms[] = {
+    "HELD-KARP",
+    "BRUTE-FORCE",
+};
+
+void DrawAlgorithmsButtons(State *state) {
+  size_t len = ARRAY_LEN(all_algorithms);
+  for (size_t i = 0; i < len; i++) {
+    bool isSelected =
+        state->selectedAlg && sv_eq(sv_from_cstr(state->selectedAlg),
+                                    sv_from_cstr(all_algorithms[i]));
+    Color buttonColor = BLUE;
+
+    if (isSelected) {
+      buttonColor = BLACK;
+    }
+
+    DrawRectangle(30, 60 + i * 40, 200, 20, buttonColor);
+    DrawText(TextFormat("%s", all_algorithms[i]), 50, 60 + i * 40, POINT_RADIUS,
+             WHITE);
+    Rectangle touchArea = {30, 60 + i * 40, 200, 20};
+    bool isValidPosition =
+        CheckCollisionPointRec(GetMousePosition(), touchArea);
+
+    if (isValidPosition && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      if (!isSelected) {
+        state->selectedAlg = all_algorithms[i];
+      } else {
+        state->selectedAlg = NULL;
+      }
+    }
+  }
+
+  DrawRectangle(30, 60 + len * 40, 200, 20, ORANGE);
+  DrawText(TextFormat("%s", "PLAY"), 50, 60 + len * 40, POINT_RADIUS, WHITE);
+}
+
 int main(void) {
   Graph graph = {0};
+  State state = {0};
   int startIdx = -1;
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -23,6 +66,9 @@ int main(void) {
   char *text;
 
   while (!WindowShouldClose()) {
+
+    int width = GetScreenWidth();
+    int height = GetScreenHeight();
 
     // Change from/to insert node/edge modes
     if (IsKeyPressed(KEY_R)) {
@@ -46,13 +92,19 @@ int main(void) {
       text = "EDGE CREATION MODE";
     }
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && node_mode) {
+    Rectangle touchArea = {width * 0.3, 0, width * 0.7, height};
+    bool isValidPosition =
+        CheckCollisionPointRec(GetMousePosition(), touchArea);
+
+    if (isValidPosition && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        node_mode) {
       Point point = {.position = GetMousePosition(), .label = -1};
 
       graph_add_node(&graph, point);
     }
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !node_mode) {
+    if (isValidPosition && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        !node_mode) {
       Point point = {.position = GetMousePosition(), .label = -1};
 
       for (size_t i = 0; i < graph.nodes.count; i++) {
@@ -75,7 +127,9 @@ int main(void) {
 
     BeginDrawing();
     ClearBackground(GetColor(0x181818FF));
+    DrawRectangle(0, 0, width * 0.3, height, GetColor(0x282828FF));
     DrawText(TextFormat("%s", text), 5, 5, POINT_RADIUS * 2, WHITE);
+    DrawAlgorithmsButtons(&state);
 
     size_t n = graph.nodes.count;
     for (size_t i = 0; i < n; i++) {
