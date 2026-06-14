@@ -6,7 +6,7 @@
 
 typedef struct {
   Vector2 position;
-  int label;
+  Color color;
 } Point;
 
 typedef struct {
